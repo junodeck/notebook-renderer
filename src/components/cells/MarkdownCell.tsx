@@ -70,9 +70,9 @@ export const MarkdownCell: React.FC<MarkdownCellProps> = ({
   }, [markdown]);
 
   return (
-    <div className={clsx("markdown-cell", className)}>
+    <div className={clsx("nb-cell nb-markdown-cell", className)}>
       <div
-        className="markdown-content"
+        className="nb-markdown-content"
         dangerouslySetInnerHTML={{ __html: processedMarkdown }}
       />
 

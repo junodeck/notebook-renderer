@@ -4,6 +4,7 @@ import type { JupiterNotebook, CustomCellComponents } from "../types";
 import { CodeCellWrapper } from "./cells/CodeCellWrapper";
 import { MarkdownCellWrapper } from "./cells/MarkdownCellWrapper";
 import { RawCellWrapper } from "./cells/RawCellWrapper";
+import { OutputCellWrapper } from "./cells/OutputCellWrapper";
 import { SlideshowLayout } from "./layouts/SlideshowLayout";
 import { PageLayout } from "./layouts/PageLayout";
 
@@ -23,7 +24,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
   theme = "default",
   layout = "page",
   className,
-  showExecutionCount = true,
+  showExecutionCount = false,
   showCellNumbers = false,
   showMetadata = false,
   customComponents,
@@ -40,6 +41,7 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
     CodeCell: customComponents?.CodeCell || CodeCellWrapper,
     MarkdownCell: customComponents?.MarkdownCell || MarkdownCellWrapper,
     RawCell: customComponents?.RawCell || RawCellWrapper,
+    OutputCell: customComponents?.OutputCell || OutputCellWrapper,
   };
 
   if (layout === "slideshow") {

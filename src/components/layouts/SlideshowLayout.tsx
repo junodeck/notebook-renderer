@@ -8,6 +8,7 @@ import type {
 import { CodeCellWrapper } from "../cells/CodeCellWrapper";
 import { MarkdownCellWrapper } from "../cells/MarkdownCellWrapper";
 import { RawCellWrapper } from "../cells/RawCellWrapper";
+import { OutputCellWrapper } from "../cells/OutputCellWrapper";
 
 export interface SlideshowLayoutProps {
   notebook: JupiterNotebook;
@@ -22,6 +23,7 @@ export interface SlideshowLayoutProps {
     CodeCell: React.ComponentType<CellComponentProps>;
     MarkdownCell: React.ComponentType<CellComponentProps>;
     RawCell: React.ComponentType<CellComponentProps>;
+    OutputCell: React.ComponentType<CellComponentProps>;
   };
 }
 
@@ -36,7 +38,7 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
   notebook,
   theme = "default",
   className,
-  showExecutionCount = true,
+  showExecutionCount = false,
   showCellNumbers = false,
   showMetadata = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   customComponents,
@@ -51,6 +53,7 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
     CodeCell: customComponents?.CodeCell || CodeCellWrapper,
     MarkdownCell: customComponents?.MarkdownCell || MarkdownCellWrapper,
     RawCell: customComponents?.RawCell || RawCellWrapper,
+    OutputCell: customComponents?.OutputCell || OutputCellWrapper,
   };
 
   // Convert notebook cells to slides
@@ -229,6 +232,13 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
         return (
           <div {...cellProps}>
             <CellComponents.RawCell {...cellComponentProps} />
+          </div>
+        );
+
+      case "output":
+        return (
+          <div {...cellProps}>
+            <CellComponents.OutputCell {...cellComponentProps} />
           </div>
         );
 

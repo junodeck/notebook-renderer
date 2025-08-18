@@ -1,8 +1,6 @@
 import React from "react";
 import { clsx } from "clsx";
 import Prism from "prismjs";
-import type { JupiterOutput } from "../../types";
-import { OutputCell } from "./OutputCell";
 
 // Import common language support for Prism
 import "prismjs/components/prism-python";
@@ -18,7 +16,6 @@ export interface CodeCellProps {
   source: string[];
   language?: string;
   executionCount?: number | null;
-  outputs?: JupiterOutput[];
   metadata?: Record<string, unknown>;
   className?: string;
   showExecutionCount?: boolean;
@@ -29,14 +26,12 @@ export const CodeCell: React.FC<CodeCellProps> = ({
   source,
   language = "python",
   executionCount,
-  outputs = [],
   metadata,
   className,
-  showExecutionCount = true,
+  showExecutionCount = false,
   showLineNumbers = false,
 }) => {
   const code = source.join("\n");
-  const hasOutputs = outputs.length > 0;
 
   // Highlight code with Prism
   const highlightedCode = React.useMemo(() => {
@@ -52,10 +47,9 @@ export const CodeCell: React.FC<CodeCellProps> = ({
   return (
     <div
       className={clsx(
-        "code-cell",
+        "nb-cell nb-code-cell",
         `language-${language}`,
         {
-          "has-outputs": hasOutputs,
           "show-line-numbers": showLineNumbers,
         },
         className
@@ -63,34 +57,20 @@ export const CodeCell: React.FC<CodeCellProps> = ({
     >
       {/* Execution count indicator */}
       {showExecutionCount && (
-        <div className="execution-count">In [{executionCount ?? " "}]:</div>
+        <div className="nb-execution-count">In [{executionCount ?? " "}]:</div>
       )}
 
       {/* Code input */}
-      <div className="code-input">
+      <div className="nb-code-input">
         <pre className={`language-${language}`}>
           <code
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
-            className={clsx("code-content", {
+            className={clsx("nb-code-content", {
               "line-numbers": showLineNumbers,
             })}
           />
         </pre>
       </div>
-
-      {/* Code outputs */}
-      {hasOutputs && (
-        <div className="code-outputs">
-          {showExecutionCount && executionCount && (
-            <div className="output-count">Out [{executionCount}]:</div>
-          )}
-          <div className="output-content">
-            {outputs.map((output, index) => (
-              <OutputCell key={index} output={output} />
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Metadata (hidden by default, can be styled) */}
       {metadata && Object.keys(metadata).length > 0 && (

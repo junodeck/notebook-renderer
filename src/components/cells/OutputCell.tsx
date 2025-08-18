@@ -1,36 +1,39 @@
 import React from "react";
 import { clsx } from "clsx";
-import type { JupiterOutput } from "../../types";
+import type { JupiterCell, JupiterOutput } from "../../types";
 
 export interface OutputCellProps {
-  output: JupiterOutput;
+  cell: JupiterCell;
+  showExecutionCount?: boolean;
+  cellIndex?: number;
   className?: string;
 }
 
 export const OutputCell: React.FC<OutputCellProps> = ({
-  output,
+  cell,
+  showExecutionCount = false,
   className,
 }) => {
-  const renderOutput = () => {
+  const renderOutput = (output: JupiterOutput) => {
     switch (output.outputType) {
       case "stream":
         return (
-          <div className="stream-output">
-            <pre className="stream-text">{output.text?.join("") || ""}</pre>
+          <div className="nb-stream-output">
+            <pre className="nb-stream-text">{output.text?.join("") || ""}</pre>
           </div>
         );
 
       case "display_data":
       case "execute_result":
-        return renderDisplayData();
+        return renderDisplayData(output);
 
       case "error":
         return (
-          <div className="error-output">
-            <div className="error-name">{output.ename}</div>
-            <div className="error-value">{output.evalue}</div>
+          <div className="nb-error-output">
+            <div className="nb-error-name">{output.ename}</div>
+            <div className="nb-error-value">{output.evalue}</div>
             {output.traceback && (
-              <pre className="error-traceback">
+              <pre className="nb-error-traceback">
                 {output.traceback.join("\n")}
               </pre>
             )}
@@ -39,16 +42,16 @@ export const OutputCell: React.FC<OutputCellProps> = ({
 
       default:
         return (
-          <div className="unknown-output">
+          <div className="nb-unknown-output">
             <pre>{JSON.stringify(output, null, 2)}</pre>
           </div>
         );
     }
   };
 
-  const renderDisplayData = () => {
+  const renderDisplayData = (output: JupiterOutput) => {
     if (!output.data) {
-      return <div className="empty-output">No data</div>;
+      return <div className="nb-empty-output">No data</div>;
     }
 
     // Priority order for display data
@@ -71,7 +74,7 @@ export const OutputCell: React.FC<OutputCellProps> = ({
       }
     }
 
-    return <div className="empty-output">No displayable data</div>;
+    return <div className="nb-empty-output">No displayable data</div>;
   };
 
   const renderMimeType = (mimeType: string, data: unknown) => {
@@ -79,11 +82,11 @@ export const OutputCell: React.FC<OutputCellProps> = ({
       case "image/png":
       case "image/jpeg":
         return (
-          <div className="image-output">
+          <div className="nb-image-output">
             <img
               src={`data:${mimeType};base64,${data}`}
               alt="Notebook output"
-              className="output-image"
+              className="nb-output-image"
             />
           </div>
         );
@@ -91,7 +94,7 @@ export const OutputCell: React.FC<OutputCellProps> = ({
       case "image/svg+xml":
         return (
           <div
-            className="svg-output"
+            className="nb-svg-output"
             dangerouslySetInnerHTML={{ __html: data as string }}
           />
         );
@@ -99,7 +102,7 @@ export const OutputCell: React.FC<OutputCellProps> = ({
       case "text/html":
         return (
           <div
-            className="html-output"
+            className="nb-html-output"
             dangerouslySetInnerHTML={{
               __html: Array.isArray(data) ? data.join("") : (data as string),
             }}
@@ -115,14 +118,14 @@ export const OutputCell: React.FC<OutputCellProps> = ({
           .replace(/`([^`]+)`/g, "<code>$1</code>");
         return (
           <div
-            className="markdown-output"
+            className="nb-markdown-output"
             dangerouslySetInnerHTML={{ __html }}
           />
         );
 
       case "application/json":
         return (
-          <div className="json-output">
+          <div className="nb-json-output">
             <pre>{JSON.stringify(data, null, 2)}</pre>
           </div>
         );
@@ -130,15 +133,15 @@ export const OutputCell: React.FC<OutputCellProps> = ({
       case "text/plain":
         const text = Array.isArray(data) ? data.join("") : (data as string);
         return (
-          <div className="text-output">
-            <pre className="plain-text">{text}</pre>
+          <div className="nb-text-output">
+            <pre className="nb-plain-text">{text}</pre>
           </div>
         );
 
       default:
         return (
-          <div className="unknown-mime-output">
-            <div className="mime-type">MIME Type: {mimeType}</div>
+          <div className="nb-unknown-mime-output">
+            <div className="nb-mime-type">MIME Type: {mimeType}</div>
             <pre>
               {typeof data === "string" ? data : JSON.stringify(data, null, 2)}
             </pre>
@@ -147,15 +150,40 @@ export const OutputCell: React.FC<OutputCellProps> = ({
     }
   };
 
+  // If no outputs, render empty state
+  if (!cell.outputs || cell.outputs.length === 0) {
+    return (
+      <div
+        className={clsx("nb-cell nb-output-cell", "empty-outputs", className)}
+      >
+        <div className="nb-empty-output">No output</div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={clsx(
-        "output-cell",
-        `output-type-${output.outputType}`,
-        className
-      )}
-    >
-      {renderOutput()}
+    <div className={clsx("nb-cell nb-output-cell", className)}>
+      {/* Show execution count if enabled and available */}
+      {showExecutionCount &&
+        cell.executionCount !== null &&
+        cell.executionCount !== undefined && (
+          <div className="nb-execution-count">Out[{cell.executionCount}]:</div>
+        )}
+
+      {/* Render all outputs */}
+      <div className="nb-outputs-container">
+        {cell.outputs.map((output, index) => (
+          <div
+            key={index}
+            className={clsx(
+              "nb-output-item",
+              `output-type-${output.outputType}`
+            )}
+          >
+            {renderOutput(output)}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

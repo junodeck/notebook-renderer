@@ -1,7 +1,7 @@
 // Copy only the interfaces from jupiter.ts, no parser functions
 export interface JupiterCell {
   id: string;
-  type: "code" | "markdown" | "raw";
+  type: "code" | "markdown" | "raw" | "output";
   source: string[];
   metadata: Record<string, unknown>;
   outputs?: JupiterOutput[];
@@ -11,6 +11,8 @@ export interface JupiterCell {
   grouped?: boolean;
   groupId?: string;
   order: number;
+  // For output cells
+  parentCellId?: string;
 }
 
 export interface JupiterOutput {
@@ -76,4 +78,5 @@ export interface CustomCellComponents {
   CodeCell?: React.ComponentType<CellComponentProps>;
   MarkdownCell?: React.ComponentType<CellComponentProps>;
   RawCell?: React.ComponentType<CellComponentProps>;
+  OutputCell?: React.ComponentType<CellComponentProps>;
 }

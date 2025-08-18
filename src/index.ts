@@ -1,3 +1,5 @@
+import "./style.css";
+
 // Export only rendering components, no parser
 export { NotebookRenderer } from "./components/NotebookRenderer";
 export { CodeCell } from "./components/cells/CodeCell";
@@ -9,6 +11,7 @@ export { OutputCell } from "./components/cells/OutputCell";
 export { CodeCellWrapper } from "./components/cells/CodeCellWrapper";
 export { MarkdownCellWrapper } from "./components/cells/MarkdownCellWrapper";
 export { RawCellWrapper } from "./components/cells/RawCellWrapper";
+export { OutputCellWrapper } from "./components/cells/OutputCellWrapper";
 
 export { SlideshowLayout } from "./components/layouts/SlideshowLayout";
 export { PageLayout } from "./components/layouts/PageLayout";

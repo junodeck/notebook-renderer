@@ -8,6 +8,7 @@ import type {
 import { CodeCellWrapper } from "../cells/CodeCellWrapper";
 import { MarkdownCellWrapper } from "../cells/MarkdownCellWrapper";
 import { RawCellWrapper } from "../cells/RawCellWrapper";
+import { OutputCellWrapper } from "../cells/OutputCellWrapper";
 
 export interface PageLayoutProps {
   notebook: JupiterNotebook;
@@ -20,6 +21,7 @@ export interface PageLayoutProps {
     CodeCell: React.ComponentType<CellComponentProps>;
     MarkdownCell: React.ComponentType<CellComponentProps>;
     RawCell: React.ComponentType<CellComponentProps>;
+    OutputCell: React.ComponentType<CellComponentProps>;
   };
 }
 
@@ -27,7 +29,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   notebook,
   theme = "default",
   className,
-  showExecutionCount = true,
+  showExecutionCount = false,
   showCellNumbers = false,
   showMetadata = false,
   customComponents,
@@ -39,6 +41,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     CodeCell: customComponents?.CodeCell || CodeCellWrapper,
     MarkdownCell: customComponents?.MarkdownCell || MarkdownCellWrapper,
     RawCell: customComponents?.RawCell || RawCellWrapper,
+    OutputCell: customComponents?.OutputCell || OutputCellWrapper,
   };
 
   const renderCell = (cell: JupiterCell, index: number) => {
@@ -86,6 +89,16 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
               <div className="cell-number">[{index + 1}]</div>
             )}
             <CellComponents.RawCell {...cellComponentProps} />
+          </div>
+        );
+
+      case "output":
+        return (
+          <div {...cellProps}>
+            {showCellNumbers && (
+              <div className="cell-number">[{index + 1}]</div>
+            )}
+            <CellComponents.OutputCell {...cellComponentProps} />
           </div>
         );
 

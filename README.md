@@ -24,11 +24,69 @@ npm install @junodeck/notebook-renderer
 
 ## Usage
 
+### Setup
+
+First, import the CSS styles in your application:
+
+```tsx
+// In your main CSS file or component
+import "@junodeck/notebook-renderer/dist/style.css";
+```
+
+Or in CSS:
+
+```css
+@import "@junodeck/notebook-renderer/dist/style.css";
+```
+
+### Theme Support
+
+The library includes built-in light/dark theme support. Set the theme using:
+
+1. **Data attribute** on a parent element:
+
+```html
+<div data-theme="dark">
+  <!-- Your notebook components -->
+</div>
+```
+
+2. **CSS class** on a parent element:
+
+```html
+<div class="dark">
+  <!-- Your notebook components -->
+</div>
+```
+
+### Custom Styling
+
+You can customize the appearance by overriding CSS custom properties:
+
+```css
+:root {
+  /* Light theme customization */
+  --nb-bg-primary: #ffffff;
+  --nb-text-primary: #1e293b;
+  --nb-link: #2563eb;
+  /* ... other variables */
+}
+
+.dark {
+  /* Dark theme customization */
+  --nb-bg-primary: #0f172a;
+  --nb-text-primary: #f1f5f9;
+  --nb-link: #60a5fa;
+  /* ... other variables */
+}
+```
+
 ### Basic Usage
 
 ```tsx
 import { NotebookRenderer } from "@junodeck/notebook-renderer";
 import type { JupiterNotebook } from "@junodeck/notebook-renderer";
+import "@junodeck/notebook-renderer/dist/style.css";
 
 function App() {
   const notebook: JupiterNotebook = {

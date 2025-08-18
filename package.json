@@ -9,8 +9,11 @@
   "files": [
     "dist"
   ],
+  "style": "dist/style.css",
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && npm run build:ts && npm run build:css",
+    "build:ts": "tsc",
+    "build:css": "cp src/style.css dist/style.css",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
@@ -35,9 +38,9 @@
     "prismjs": "^1.29.0"
   },
   "devDependencies": {
+    "@types/prismjs": "^1.26.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/prismjs": "^1.26.0",
     "typescript": "^5.0.0"
   }
 }

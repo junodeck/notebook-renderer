@@ -19,18 +19,18 @@ export const RawCell: React.FC<RawCellProps> = ({
   return (
     <div
       className={clsx(
-        "raw-cell",
+        "nb-cell nb-raw-cell",
         {
           "preserve-whitespace": preserveWhitespace,
         },
         className
       )}
     >
-      <div className="raw-content">
+      <div className="nb-raw-content">
         {preserveWhitespace ? (
-          <pre className="raw-text">{content}</pre>
+          <pre className="nb-raw-text">{content}</pre>
         ) : (
-          <div className="raw-text">{content}</div>
+          <div className="nb-raw-text">{content}</div>
         )}
       </div>
 
