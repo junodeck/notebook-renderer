@@ -1,9 +1,13 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { clsx } from "clsx";
-import type { JupiterNotebook } from "../../types";
-import { CodeCell } from "../cells/CodeCell";
-import { MarkdownCell } from "../cells/MarkdownCell";
-import { RawCell } from "../cells/RawCell";
+import type {
+  JupiterNotebook,
+  JupiterCell,
+  CellComponentProps,
+} from "../../types";
+import { CodeCellWrapper } from "../cells/CodeCellWrapper";
+import { MarkdownCellWrapper } from "../cells/MarkdownCellWrapper";
+import { RawCellWrapper } from "../cells/RawCellWrapper";
 
 export interface SlideshowLayoutProps {
   notebook: JupiterNotebook;
@@ -11,14 +15,20 @@ export interface SlideshowLayoutProps {
   className?: string;
   showExecutionCount?: boolean;
   showCellNumbers?: boolean;
+  showMetadata?: boolean;
   autoAdvance?: boolean;
   autoAdvanceDelay?: number;
+  customComponents?: {
+    CodeCell: React.ComponentType<CellComponentProps>;
+    MarkdownCell: React.ComponentType<CellComponentProps>;
+    RawCell: React.ComponentType<CellComponentProps>;
+  };
 }
 
 interface Slide {
   id: string;
   title: string;
-  cells: any[];
+  cells: JupiterCell[];
   type: "title" | "content" | "code" | "conclusion";
 }
 
@@ -28,11 +38,20 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
   className,
   showExecutionCount = true,
   showCellNumbers = false,
+  showMetadata = false, // eslint-disable-line @typescript-eslint/no-unused-vars
+  customComponents,
   autoAdvance = false,
   autoAdvanceDelay = 5000,
 }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Use custom components or fall back to default wrapper ones
+  const CellComponents = {
+    CodeCell: customComponents?.CodeCell || CodeCellWrapper,
+    MarkdownCell: customComponents?.MarkdownCell || MarkdownCellWrapper,
+    RawCell: customComponents?.RawCell || RawCellWrapper,
+  };
 
   // Convert notebook cells to slides
   const slides = React.useMemo(() => {
@@ -42,7 +61,7 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
       (cell) => cell.visible !== false
     );
 
-    visibleCells.forEach((cell, index) => {
+    visibleCells.forEach((cell) => {
       // Create new slide on markdown headers
       if (cell.type === "markdown") {
         const content = cell.source.join("");
@@ -55,10 +74,8 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
           }
 
           // Start new slide
-          // @ts-expect-error - TODO: fix this
-          const level = headerMatch[1].length;
-          // @ts-expect-error - TODO: fix this
-          const title = headerMatch[2].trim();
+          const level = headerMatch[1]?.length || 1;
+          const title = headerMatch[2]?.trim() || "Untitled";
 
           currentSlide = {
             id: `slide-${generatedSlides.length}`,
@@ -126,7 +143,7 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
   );
 
   // Auto-advance functionality
-  // @ts-expect-error - TODO: fix this
+  // @ts-expect-error - fix this later
   useEffect(() => {
     if (autoAdvance && isPlaying) {
       const interval = setInterval(() => {
@@ -176,7 +193,7 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [nextSlide, prevSlide, goToSlide, slides.length]);
 
-  const renderCell = (cell: any, index: number) => {
+  const renderCell = (cell: JupiterCell, index: number) => {
     const cellProps = {
       key: cell.id || `cell-${index}`,
       className: clsx("slide-cell", {
@@ -185,32 +202,33 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
       }),
     };
 
+    // Common cell props for custom components
+    const cellComponentProps = {
+      cell,
+      showExecutionCount,
+      showCellNumbers,
+      cellIndex: index,
+    };
+
     switch (cell.type) {
       case "code":
         return (
           <div {...cellProps}>
-            <CodeCell
-              source={cell.source}
-              language={notebook.metadata.language_info?.name || "python"}
-              executionCount={cell.executionCount}
-              outputs={cell.outputs}
-              metadata={cell.metadata}
-              showExecutionCount={showExecutionCount}
-            />
+            <CellComponents.CodeCell {...cellComponentProps} />
           </div>
         );
 
       case "markdown":
         return (
           <div {...cellProps}>
-            <MarkdownCell source={cell.source} metadata={cell.metadata} />
+            <CellComponents.MarkdownCell {...cellComponentProps} />
           </div>
         );
 
       case "raw":
         return (
           <div {...cellProps}>
-            <RawCell source={cell.source} metadata={cell.metadata} />
+            <CellComponents.RawCell {...cellComponentProps} />
           </div>
         );
 
@@ -231,7 +249,7 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
         <div className="empty-slideshow">
           <h2>No slides available</h2>
           <p>
-            This notebook doesn't contain any visible cells to display as
+            This notebook doesn&apos;t contain any visible cells to display as
             slides.
           </p>
         </div>

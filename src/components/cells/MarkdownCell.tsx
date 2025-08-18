@@ -58,7 +58,7 @@ export const MarkdownCell: React.FC<MarkdownCellProps> = ({
 
     // Wrap lists in ul tags
     const withLists = parsed
-      .replace(/(<li>.*<\/li>)/s, "<ul>$1</ul>")
+      .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
       .replace(/<\/li><li>/g, "</li><li>");
 
     // Wrap in paragraph if it doesn't start with block elements

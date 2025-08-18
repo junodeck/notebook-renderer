@@ -1,9 +1,9 @@
 import React from "react";
 import { clsx } from "clsx";
-import type { JupiterNotebook } from "../types";
-import { CodeCell } from "./cells/CodeCell";
-import { MarkdownCell } from "./cells/MarkdownCell";
-import { RawCell } from "./cells/RawCell";
+import type { JupiterNotebook, CustomCellComponents } from "../types";
+import { CodeCellWrapper } from "./cells/CodeCellWrapper";
+import { MarkdownCellWrapper } from "./cells/MarkdownCellWrapper";
+import { RawCellWrapper } from "./cells/RawCellWrapper";
 import { SlideshowLayout } from "./layouts/SlideshowLayout";
 import { PageLayout } from "./layouts/PageLayout";
 
@@ -14,6 +14,8 @@ export interface NotebookRendererProps {
   className?: string;
   showExecutionCount?: boolean;
   showCellNumbers?: boolean;
+  showMetadata?: boolean;
+  customComponents?: CustomCellComponents;
 }
 
 export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
@@ -23,6 +25,8 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
   className,
   showExecutionCount = true,
   showCellNumbers = false,
+  showMetadata = false,
+  customComponents,
 }) => {
   const baseClasses = clsx(
     "notebook-renderer",
@@ -30,6 +34,13 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
     `layout-${layout}`,
     className
   );
+
+  // Merge default components with custom components
+  const components = {
+    CodeCell: customComponents?.CodeCell || CodeCellWrapper,
+    MarkdownCell: customComponents?.MarkdownCell || MarkdownCellWrapper,
+    RawCell: customComponents?.RawCell || RawCellWrapper,
+  };
 
   if (layout === "slideshow") {
     return (
@@ -39,6 +50,8 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
           theme={theme}
           showExecutionCount={showExecutionCount}
           showCellNumbers={showCellNumbers}
+          showMetadata={showMetadata}
+          customComponents={components}
         />
       </div>
     );
@@ -51,6 +64,8 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
         theme={theme}
         showExecutionCount={showExecutionCount}
         showCellNumbers={showCellNumbers}
+        showMetadata={showMetadata}
+        customComponents={components}
       />
     </div>
   );

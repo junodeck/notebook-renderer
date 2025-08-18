@@ -1,9 +1,13 @@
 import React from "react";
 import { clsx } from "clsx";
-import type { JupiterNotebook } from "../../types";
-import { CodeCell } from "../cells/CodeCell";
-import { MarkdownCell } from "../cells/MarkdownCell";
-import { RawCell } from "../cells/RawCell";
+import type {
+  JupiterNotebook,
+  JupiterCell,
+  CellComponentProps,
+} from "../../types";
+import { CodeCellWrapper } from "../cells/CodeCellWrapper";
+import { MarkdownCellWrapper } from "../cells/MarkdownCellWrapper";
+import { RawCellWrapper } from "../cells/RawCellWrapper";
 
 export interface PageLayoutProps {
   notebook: JupiterNotebook;
@@ -12,6 +16,11 @@ export interface PageLayoutProps {
   showExecutionCount?: boolean;
   showCellNumbers?: boolean;
   showMetadata?: boolean;
+  customComponents?: {
+    CodeCell: React.ComponentType<CellComponentProps>;
+    MarkdownCell: React.ComponentType<CellComponentProps>;
+    RawCell: React.ComponentType<CellComponentProps>;
+  };
 }
 
 export const PageLayout: React.FC<PageLayoutProps> = ({
@@ -21,16 +30,32 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   showExecutionCount = true,
   showCellNumbers = false,
   showMetadata = false,
+  customComponents,
 }) => {
   const visibleCells = notebook.cells.filter((cell) => cell.visible !== false);
 
-  const renderCell = (cell: any, index: number) => {
+  // Use custom components or fall back to default wrapper ones
+  const CellComponents = {
+    CodeCell: customComponents?.CodeCell || CodeCellWrapper,
+    MarkdownCell: customComponents?.MarkdownCell || MarkdownCellWrapper,
+    RawCell: customComponents?.RawCell || RawCellWrapper,
+  };
+
+  const renderCell = (cell: JupiterCell, index: number) => {
     const cellProps = {
       key: cell.id || `cell-${index}`,
       className: clsx("notebook-cell", {
         grouped: cell.grouped,
         [`group-${cell.groupId}`]: cell.groupId,
       }),
+    };
+
+    // Common cell props for custom components
+    const cellComponentProps = {
+      cell,
+      showExecutionCount,
+      showCellNumbers,
+      cellIndex: index,
     };
 
     switch (cell.type) {
@@ -40,14 +65,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             {showCellNumbers && (
               <div className="cell-number">[{index + 1}]</div>
             )}
-            <CodeCell
-              source={cell.source}
-              language={notebook.metadata.language_info?.name || "python"}
-              executionCount={cell.executionCount}
-              outputs={cell.outputs}
-              metadata={cell.metadata}
-              showExecutionCount={showExecutionCount}
-            />
+            <CellComponents.CodeCell {...cellComponentProps} />
           </div>
         );
 
@@ -57,7 +75,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             {showCellNumbers && (
               <div className="cell-number">[{index + 1}]</div>
             )}
-            <MarkdownCell source={cell.source} metadata={cell.metadata} />
+            <CellComponents.MarkdownCell {...cellComponentProps} />
           </div>
         );
 
@@ -67,7 +85,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
             {showCellNumbers && (
               <div className="cell-number">[{index + 1}]</div>
             )}
-            <RawCell source={cell.source} metadata={cell.metadata} />
+            <CellComponents.RawCell {...cellComponentProps} />
           </div>
         );
 

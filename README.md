@@ -76,6 +76,150 @@ function CustomNotebook() {
 }
 ```
 
+### Custom Cell Components
+
+You can provide your own custom components to wrap or replace the default cell rendering:
+
+```tsx
+import {
+  NotebookRenderer,
+  type CellComponentProps,
+} from "@junodeck/notebook-renderer";
+
+// Custom Code Cell with syntax highlighting theme
+const CustomCodeCell: React.FC<CellComponentProps> = ({
+  cell,
+  showExecutionCount,
+  cellIndex,
+}) => {
+  return (
+    <div className="my-custom-code-cell">
+      <div className="cell-header">
+        Code Cell #{cellIndex + 1}
+        {showExecutionCount && cell.executionCount && (
+          <span className="execution-count">In [{cell.executionCount}]:</span>
+        )}
+      </div>
+      <pre className="code-content">
+        <code>{cell.source.join("\n")}</code>
+      </pre>
+      {cell.outputs && cell.outputs.length > 0 && (
+        <div className="outputs">{/* Render outputs */}</div>
+      )}
+    </div>
+  );
+};
+
+// Custom Markdown Cell with enhanced styling
+const CustomMarkdownCell: React.FC<CellComponentProps> = ({ cell }) => {
+  const markdownContent = cell.source.join("\n");
+
+  return (
+    <div className="my-custom-markdown-cell">
+      <div className="markdown-content">
+        {/* Your custom markdown rendering logic */}
+        {markdownContent}
+      </div>
+    </div>
+  );
+};
+
+// Use custom components
+function App() {
+  const customComponents = {
+    CodeCell: CustomCodeCell,
+    MarkdownCell: CustomMarkdownCell,
+    // RawCell: CustomRawCell, // Optional
+  };
+
+  return (
+    <NotebookRenderer
+      notebook={notebook}
+      customComponents={customComponents}
+      theme="jupiter-dark"
+      layout="page"
+    />
+  );
+}
+```
+
+### Advanced Custom Components
+
+For more complex customizations, you can create sophisticated wrapper components:
+
+```tsx
+import {
+  NotebookRenderer,
+  type CellComponentProps,
+  OutputCell,
+} from "@junodeck/notebook-renderer";
+
+// Advanced Code Cell with collapsible outputs
+const AdvancedCodeCell: React.FC<CellComponentProps> = ({
+  cell,
+  showExecutionCount,
+  cellIndex,
+}) => {
+  const [outputsVisible, setOutputsVisible] = useState(true);
+
+  return (
+    <div className="advanced-code-cell">
+      <div className="cell-toolbar">
+        <span className="cell-type">Code</span>
+        {showExecutionCount && cell.executionCount && (
+          <span className="execution-badge">In [{cell.executionCount}]</span>
+        )}
+        {cell.outputs && cell.outputs.length > 0 && (
+          <button
+            onClick={() => setOutputsVisible(!outputsVisible)}
+            className="toggle-outputs"
+          >
+            {outputsVisible ? "Hide" : "Show"} Outputs
+          </button>
+        )}
+      </div>
+
+      <pre className="code-block">
+        <code>{cell.source.join("\n")}</code>
+      </pre>
+
+      {outputsVisible && cell.outputs && (
+        <div className="outputs-section">
+          {cell.outputs.map((output, idx) => (
+            <OutputCell key={idx} output={output} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Markdown Cell with table of contents generation
+const TOCMarkdownCell: React.FC<CellComponentProps> = ({ cell }) => {
+  const content = cell.source.join("\n");
+  const headers = content.match(/^#+\s+(.+)$/gm) || [];
+
+  return (
+    <div className="toc-markdown-cell">
+      {headers.length > 0 && (
+        <div className="toc">
+          <h4>Contents:</h4>
+          <ul>
+            {headers.map((header, idx) => (
+              <li key={idx}>{header.replace(/^#+\s+/, "")}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div className="markdown-content">
+        {/* Your markdown rendering */}
+        {content}
+      </div>
+    </div>
+  );
+};
+```
+
 ### Custom Layouts
 
 ```tsx
@@ -120,6 +264,10 @@ Main component for rendering complete notebooks.
 - `theme?: string` - Theme name (default: "default")
 - `layout?: "page" | "slideshow"` - Layout type (default: "page")
 - `className?: string` - Additional CSS classes
+- `showExecutionCount?: boolean` - Show execution counts (default: true)
+- `showCellNumbers?: boolean` - Show cell numbers (default: false)
+- `showMetadata?: boolean` - Show cell metadata (default: false)
+- `customComponents?: CustomCellComponents` - Custom cell components
 
 #### `CodeCell`
 
@@ -178,6 +326,19 @@ interface JupiterNotebook {
     }>;
   };
 }
+
+interface CellComponentProps {
+  cell: JupiterCell;
+  showExecutionCount?: boolean;
+  showCellNumbers?: boolean;
+  cellIndex?: number;
+}
+
+interface CustomCellComponents {
+  CodeCell?: React.ComponentType<CellComponentProps>;
+  MarkdownCell?: React.ComponentType<CellComponentProps>;
+  RawCell?: React.ComponentType<CellComponentProps>;
+}
 ```
 
 ## Themes
@@ -189,6 +350,73 @@ Available themes:
 - `jupiter-light` - Light theme with Jupiter colors
 - `scientific` - Academic paper style
 - `presentation` - High contrast for presentations
+
+## Examples
+
+### Creating a Custom Code Cell with Copy Button
+
+```tsx
+import {
+  NotebookRenderer,
+  type CellComponentProps,
+  OutputCell,
+} from "@junodeck/notebook-renderer";
+
+const CopyableCodeCell: React.FC<CellComponentProps> = ({
+  cell,
+  showExecutionCount,
+  cellIndex,
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async () => {
+    const code = cell.source.join("\n");
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="copyable-code-cell">
+      <div className="code-header">
+        <span className="cell-label">Code Cell</span>
+        {showExecutionCount && cell.executionCount && (
+          <span className="execution-count">In [{cell.executionCount}]</span>
+        )}
+        <button
+          onClick={copyToClipboard}
+          className="copy-button"
+          title="Copy code"
+        >
+          {copied ? "✓ Copied!" : "📋 Copy"}
+        </button>
+      </div>
+
+      <pre className="code-content">
+        <code>{cell.source.join("\n")}</code>
+      </pre>
+
+      {cell.outputs && cell.outputs.length > 0 && (
+        <div className="outputs">
+          {cell.outputs.map((output, idx) => (
+            <OutputCell key={idx} output={output} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Usage
+function App() {
+  return (
+    <NotebookRenderer
+      notebook={notebook}
+      customComponents={{ CodeCell: CopyableCodeCell }}
+    />
+  );
+}
+```
 
 ## Development
 

@@ -62,3 +62,18 @@ export interface JupiterNotebook {
     }>;
   };
 }
+
+// Props for cell components
+export interface CellComponentProps {
+  cell: JupiterCell;
+  showExecutionCount?: boolean;
+  showCellNumbers?: boolean;
+  cellIndex?: number;
+}
+
+// Custom component interfaces
+export interface CustomCellComponents {
+  CodeCell?: React.ComponentType<CellComponentProps>;
+  MarkdownCell?: React.ComponentType<CellComponentProps>;
+  RawCell?: React.ComponentType<CellComponentProps>;
+}

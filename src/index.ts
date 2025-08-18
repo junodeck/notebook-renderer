@@ -4,13 +4,25 @@ export { CodeCell } from "./components/cells/CodeCell";
 export { MarkdownCell } from "./components/cells/MarkdownCell";
 export { RawCell } from "./components/cells/RawCell";
 export { OutputCell } from "./components/cells/OutputCell";
+
+// Export wrapper components for custom component support
+export { CodeCellWrapper } from "./components/cells/CodeCellWrapper";
+export { MarkdownCellWrapper } from "./components/cells/MarkdownCellWrapper";
+export { RawCellWrapper } from "./components/cells/RawCellWrapper";
+
 export { SlideshowLayout } from "./components/layouts/SlideshowLayout";
 export { PageLayout } from "./components/layouts/PageLayout";
 export { useNotebook } from "./hooks/useNotebook";
 export { useTheme, defaultThemes } from "./hooks/useTheme";
 
 // Export types
-export type { JupiterNotebook, JupiterCell, JupiterOutput } from "./types";
+export type {
+  JupiterNotebook,
+  JupiterCell,
+  JupiterOutput,
+  CellComponentProps,
+  CustomCellComponents,
+} from "./types";
 
 // Export component prop types
 export type { NotebookRendererProps } from "./components/NotebookRenderer";
