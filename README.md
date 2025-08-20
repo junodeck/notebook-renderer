@@ -21,6 +21,7 @@ npm install @junodeck/notebook-renderer
 - 🎨 **Themeable** - Customizable themes including Jupiter-inspired designs
 - 🔧 **TypeScript** - Full type safety and IntelliSense support
 - ⚡ **Performance** - Optimized rendering with React best practices
+- 🌐 **Built-in API** - Fetch deck data directly from JunoDeck servers
 
 ## Usage
 
@@ -200,6 +201,30 @@ function App() {
   );
 }
 ```
+
+## API Integration
+
+The library includes built-in functions to fetch deck data from JunoDeck servers:
+
+```tsx
+import { fetchNotebook, NotebookRenderer } from "@junodeck/notebook-renderer";
+
+function MyDeckViewer({ deckId, apiKey }) {
+  const [notebook, setNotebook] = useState(null);
+
+  useEffect(() => {
+    fetchNotebook(deckId, { apiKey }).then(setNotebook).catch(console.error);
+  }, [deckId, apiKey]);
+
+  if (!notebook) return <div>Loading...</div>;
+
+  return (
+    <NotebookRenderer notebook={notebook} theme="jupiter-light" layout="page" />
+  );
+}
+```
+
+For detailed API documentation including domain configuration and error handling, see [API.md](./API.md).
 
 ### Advanced Custom Components
 

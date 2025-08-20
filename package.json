@@ -5,9 +5,14 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
-    "dist"
+    "dist",
+    "API.md",
+    "README.md"
   ],
   "style": "dist/style.css",
   "scripts": {
@@ -42,5 +47,13 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "typescript": "^5.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/junodeck/notebook-renderer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/junodeck/notebook-renderer/issues"
+  },
+  "homepage": "https://github.com/junodeck/notebook-renderer#readme"
 }

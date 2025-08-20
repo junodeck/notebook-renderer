@@ -27,7 +27,7 @@
   --nb-spacing-2xl: 2rem;
 }
 
-/* Dark theme colors */
+/* Dark theme colors - These are fallback values, actual themes are applied via useTheme hook */
 [data-theme="dark"],
 .dark {
   --nb-bg-primary: #0f172a;

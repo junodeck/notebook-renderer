@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { clsx } from "clsx";
 import type { JupiterNotebook, CustomCellComponents } from "../types";
 import { CodeCellWrapper } from "./cells/CodeCellWrapper";
@@ -7,6 +7,7 @@ import { RawCellWrapper } from "./cells/RawCellWrapper";
 import { OutputCellWrapper } from "./cells/OutputCellWrapper";
 import { SlideshowLayout } from "./layouts/SlideshowLayout";
 import { PageLayout } from "./layouts/PageLayout";
+import { useTheme } from "../hooks/useTheme";
 
 export interface NotebookRendererProps {
   notebook: JupiterNotebook;
@@ -29,6 +30,14 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
   showMetadata = false,
   customComponents,
 }) => {
+  // Use the theme hook to apply theme changes
+  const { setTheme } = useTheme(theme);
+
+  // Apply theme when it changes
+  useEffect(() => {
+    setTheme(theme);
+  }, [theme, setTheme]);
+
   const baseClasses = clsx(
     "notebook-renderer",
     `theme-${theme}`,

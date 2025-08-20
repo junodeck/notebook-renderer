@@ -211,37 +211,30 @@ export function useTheme(initialTheme: string = "default"): UseThemeReturn {
   const applyTheme = useCallback((theme: ThemeConfig) => {
     const root = document.documentElement;
 
-    // Apply CSS custom properties
-    root.style.setProperty("--nb-bg", theme.colors.background);
-    root.style.setProperty("--nb-fg", theme.colors.foreground);
-    root.style.setProperty("--nb-primary", theme.colors.primary);
-    root.style.setProperty("--nb-secondary", theme.colors.secondary);
-    root.style.setProperty("--nb-accent", theme.colors.accent);
-    root.style.setProperty("--nb-muted", theme.colors.muted);
+    // Apply CSS custom properties that match our style.css
+    root.style.setProperty("--nb-bg-primary", theme.colors.background);
+    root.style.setProperty("--nb-bg-secondary", theme.colors.muted);
+    root.style.setProperty("--nb-bg-code", theme.colors.code.background);
+    // Set error background based on theme
+    const errorBg =
+      theme.name === "jupiter-dark" || theme.name === "presentation"
+        ? "#450a0a"
+        : "#fef2f2";
+    root.style.setProperty("--nb-bg-error", errorBg);
+
+    root.style.setProperty("--nb-text-primary", theme.colors.foreground);
+    root.style.setProperty("--nb-text-secondary", theme.colors.secondary);
+    root.style.setProperty("--nb-text-muted", theme.colors.secondary);
+    root.style.setProperty("--nb-text-code", theme.colors.code.text);
+    root.style.setProperty("--nb-text-error", theme.colors.code.number);
+
     root.style.setProperty("--nb-border", theme.colors.border);
+    root.style.setProperty("--nb-border-code", theme.colors.border);
 
-    // Code colors
-    root.style.setProperty("--nb-code-bg", theme.colors.code.background);
-    root.style.setProperty("--nb-code-text", theme.colors.code.text);
-    root.style.setProperty("--nb-code-keyword", theme.colors.code.keyword);
-    root.style.setProperty("--nb-code-string", theme.colors.code.string);
-    root.style.setProperty("--nb-code-comment", theme.colors.code.comment);
-    root.style.setProperty("--nb-code-number", theme.colors.code.number);
+    root.style.setProperty("--nb-link", theme.colors.primary);
+    root.style.setProperty("--nb-link-hover", theme.colors.accent);
 
-    // Typography
-    root.style.setProperty("--nb-font-family", theme.typography.fontFamily);
-    root.style.setProperty(
-      "--nb-code-font-family",
-      theme.typography.codeFontFamily
-    );
-    root.style.setProperty("--nb-font-size", theme.typography.fontSize.base);
-    root.style.setProperty(
-      "--nb-heading-size",
-      theme.typography.fontSize.heading
-    );
-    root.style.setProperty("--nb-code-size", theme.typography.fontSize.code);
-
-    // Add theme class to body
+    // Add theme class to body for additional theme-specific styling
     document.body.className = document.body.className
       .replace(/theme-\w+/g, "")
       .trim();

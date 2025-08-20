@@ -18,6 +18,10 @@ export { PageLayout } from "./components/layouts/PageLayout";
 export { useNotebook } from "./hooks/useNotebook";
 export { useTheme, defaultThemes } from "./hooks/useTheme";
 
+// Export API functions
+export { fetchDeck, fetchNotebook } from "./api";
+export { getApiConfig, getApiUrl } from "./config";
+
 // Export types
 export type {
   JupiterNotebook,
@@ -43,3 +47,12 @@ export type {
   NotebookGroup,
 } from "./hooks/useNotebook";
 export type { UseThemeReturn, ThemeConfig } from "./hooks/useTheme";
+
+// Export API types
+export type {
+  DeckApiResponse,
+  ApiErrorResponse,
+  FetchDeckOptions,
+  FetchDeckResult,
+} from "./api/types";
+export type { ApiConfig } from "./config";
