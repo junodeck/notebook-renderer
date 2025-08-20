@@ -1,0 +1,129 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g., 1.0.0, 1.0.0-beta.1)"
+        required: true
+        type: string
+      prerelease:
+        description: "Is this a prerelease?"
+        required: false
+        type: boolean
+        default: false
+      api_url:
+        description: "API URL for production build"
+        required: false
+        type: string
+        default: "https://junodeck.cc"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-.*)?$ ]]; then
+            echo "❌ Invalid version format. Use semver format (e.g., 1.0.0, 1.0.0-beta.1)"
+            exit 1
+          fi
+          echo "✅ Version format is valid: ${{ github.event.inputs.version }}"
+
+  test:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Build package
+        run: npm run build
+
+  publish:
+    needs: [validate, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update package version
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+
+      - name: Build with production config
+        run: |
+          JUNODECK_API_URL=${{ github.event.inputs.api_url }} npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Publish to npm
+        run: |
+          if [ "${{ github.event.inputs.prerelease }}" == "true" ]; then
+            npm publish --access public --tag beta
+            echo "📦 Published as beta version"
+          else
+            npm publish --access public
+            echo "📦 Published as latest version"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create Git Tag
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
+          git push origin "v${{ github.event.inputs.version }}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: JunoDeck Notebook Renderer v${{ github.event.inputs.version }}
+          body: |
+            ## 🚀 JunoDeck Notebook Renderer v${{ github.event.inputs.version }}
+
+            ${{ github.event.inputs.prerelease == 'true' && '⚠️ **This is a prerelease version**' || '✅ **Stable release**' }}
+
+            ### 📦 Installation
+            ```bash
+            ${{ github.event.inputs.prerelease == 'true' && format('npm install @junodeck/notebook-renderer@{0}', github.event.inputs.version) || format('npm install @junodeck/notebook-renderer@{0}', github.event.inputs.version) }}
+            ```
+
+            ### 🔗 Links
+            - [📚 API Documentation](./API.md)
+            - [📖 README](./README.md)
+            - [📦 NPM Package](https://www.npmjs.com/package/@junodeck/notebook-renderer)
+
+            ### ⚙️ Build Configuration
+            - API URL: `${{ github.event.inputs.api_url }}`
+            - Environment: Production
+            - Node.js: 22
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease }}
