@@ -43,6 +43,7 @@
     "prismjs": "^1.29.0"
   },
   "devDependencies": {
+    "@types/node": "^24.3.0",
     "@types/prismjs": "^1.26.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
