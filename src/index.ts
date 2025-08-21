@@ -19,7 +19,7 @@ export { useNotebook } from "./hooks/useNotebook";
 export { useTheme, defaultThemes } from "./hooks/useTheme";
 
 // Export API functions
-export { fetchDeck, fetchNotebook } from "./api";
+export { fetchDeck, fetchNotebook, fetchDeckList } from "./api";
 export { getApiConfig, getApiUrl } from "./config";
 
 // Export types
@@ -54,5 +54,8 @@ export type {
   ApiErrorResponse,
   FetchDeckOptions,
   FetchDeckResult,
+  DeckListApiResponse,
+  FetchDeckListResult,
+  FetchDeckListOptions,
 } from "./api/types";
 export type { ApiConfig } from "./config";

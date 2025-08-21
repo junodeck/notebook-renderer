@@ -37,7 +37,7 @@ export interface ApiErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -54,10 +54,49 @@ export interface FetchDeckOptions {
 }
 
 /**
+ * Options for fetching deck list with pagination
+ */
+export interface FetchDeckListOptions extends FetchDeckOptions {
+  /** Number of records to skip (default: 0) */
+  skip?: number;
+  /** Maximum number of records to return (default: 20, max: 100) */
+  limit?: number;
+}
+
+/**
  * Result of fetching deck data
  */
 export interface FetchDeckResult {
   success: boolean;
   data?: DeckApiResponse["data"];
+  error?: string;
+}
+
+/**
+ * API response for deck list
+ */
+export interface DeckListApiResponse {
+  success: boolean;
+  data: {
+    id: string;
+    title: string;
+    notebookTitle: string;
+    publicUrl: string;
+  }[];
+  pagination: {
+    skip: number;
+    limit: number;
+    total: number;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * Result of fetching deck list
+ */
+export interface FetchDeckListResult {
+  success: boolean;
+  data?: DeckListApiResponse["data"];
+  pagination?: DeckListApiResponse["pagination"];
   error?: string;
 }

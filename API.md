@@ -63,6 +63,72 @@ if (notebook) {
 }
 ```
 
+### `fetchDeckList(options)`
+
+Fetch all published decks created by the authenticated user with pagination support.
+
+```typescript
+const result = await fetchDeckList({
+  apiKey: "jdk_your_api_key_here",
+  skip: 0, // optional, default: 0
+  limit: 10, // optional, default: 20, max: 100
+  timeout: 10000, // optional
+  headers: { "Custom-Header": "value" }, // optional
+});
+
+if (result.success && result.data && result.pagination) {
+  console.log(`Found ${result.pagination.total} decks total`);
+  console.log(
+    `Showing ${result.data.length} decks (${result.pagination.skip + 1}-${
+      result.pagination.skip + result.data.length
+    })`
+  );
+
+  result.data.forEach((deck) => {
+    console.log(`${deck.title}: ${deck.publicUrl}`);
+    console.log(`Notebook: ${deck.notebookTitle}`);
+  });
+
+  if (result.pagination.hasMore) {
+    console.log("More decks available - use skip parameter for next page");
+  }
+} else {
+  console.error(result.error);
+}
+```
+
+#### Pagination Example
+
+```typescript
+// Fetch first page
+let skip = 0;
+const limit = 5;
+
+do {
+  const result = await fetchDeckList({
+    apiKey: "jdk_your_api_key_here",
+    skip,
+    limit,
+  });
+
+  if (result.success && result.data && result.pagination) {
+    console.log(`Page ${Math.floor(skip / limit) + 1}:`);
+    result.data.forEach((deck, index) => {
+      console.log(`${skip + index + 1}. ${deck.title}`);
+    });
+
+    if (result.pagination.hasMore) {
+      skip += limit; // Move to next page
+    } else {
+      break; // No more pages
+    }
+  } else {
+    console.error("Failed to fetch decks:", result.error);
+    break;
+  }
+} while (true);
+```
+
 ## Domain Configuration
 
 The library automatically detects the correct API domain:
@@ -191,6 +257,9 @@ import type {
   DeckApiResponse,
   FetchDeckOptions,
   FetchDeckResult,
+  DeckListApiResponse,
+  FetchDeckListResult,
+  FetchDeckListOptions,
   ApiConfig,
 } from "@junodeck/notebook-renderer";
 ```
