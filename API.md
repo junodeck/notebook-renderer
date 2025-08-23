@@ -131,18 +131,24 @@ do {
 
 ## Domain Configuration
 
-The library automatically detects the correct API domain:
+The library uses `https://junodeck.cc` as the default API domain for all environments.
 
-### Development
+### Default Behavior
 
-- **Auto-detection**: Uses `http://localhost:3000` when hostname is `localhost`
-- **Port detection**: Automatically uses current port if different
+- **Default URL**: Always uses `https://junodeck.cc` unless overridden
+- **Environment override**: Set `JUNODECK_API_URL` environment variable to use a different URL
+- **Runtime override**: Set `window.__JUNODECK_API_URL__` in browser to use a different URL
 
-### Production
+### Local Development
 
-- **Auto-detection**: Uses current domain with HTTPS
-- **Environment override**: Set `JUNODECK_API_URL` environment variable
-- **Runtime override**: Set `window.__JUNODECK_API_URL__` in browser
+For local development, you'll typically want to override the default URL:
+
+```bash
+# Set environment variable for local development
+export JUNODECK_API_URL=http://localhost:3000
+# or
+JUNODECK_API_URL=http://localhost:3000 npm run dev
+```
 
 ### Build-Time Configuration
 
@@ -151,8 +157,11 @@ For production builds, you can set the API URL at build time:
 #### Option 1: Environment Variable
 
 ```bash
-# During build
-JUNODECK_API_URL=https://api.junodeck.com npm run build
+# During build - use custom API URL
+JUNODECK_API_URL=https://api.custom-domain.com npm run build
+
+# For local development
+JUNODECK_API_URL=http://localhost:3000 npm run build
 ```
 
 #### Option 2: Webpack DefinePlugin
@@ -160,7 +169,9 @@ JUNODECK_API_URL=https://api.junodeck.com npm run build
 ```javascript
 // webpack.config.js
 new webpack.DefinePlugin({
-  "process.env.JUNODECK_API_URL": JSON.stringify("https://api.junodeck.com"),
+  "process.env.JUNODECK_API_URL": JSON.stringify(
+    "https://api.custom-domain.com"
+  ),
 });
 ```
 
@@ -168,7 +179,7 @@ new webpack.DefinePlugin({
 
 ```javascript
 // Set before importing the library
-window.__JUNODECK_API_URL__ = "https://api.junodeck.com";
+window.__JUNODECK_API_URL__ = "https://api.custom-domain.com";
 ```
 
 ### GitHub Actions Example
@@ -189,9 +200,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build with production API
+      - name: Build with custom API (optional)
         env:
-          JUNODECK_API_URL: https://junodeck.com
+          JUNODECK_API_URL: https://api.custom-domain.com
         run: npm run build
 
       - name: Deploy
@@ -208,7 +219,7 @@ Get current API configuration:
 import { getApiConfig } from "@junodeck/notebook-renderer";
 
 const config = getApiConfig();
-console.log(config.baseUrl); // e.g., "https://junodeck.com"
+console.log(config.baseUrl); // "https://junodeck.cc" (default)
 console.log(config.version); // "v1"
 ```
 
@@ -220,7 +231,7 @@ Get full API URL for an endpoint:
 import { getApiUrl } from "@junodeck/notebook-renderer";
 
 const url = getApiUrl("/deck/123");
-// Returns: "https://junodeck.com/api/v1/deck/123"
+// Returns: "https://junodeck.cc/api/v1/deck/123"
 ```
 
 ## Error Handling

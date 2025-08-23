@@ -28,36 +28,10 @@ export function getApiConfig(): ApiConfig {
     };
   }
 
-  // Auto-detect based on current location (browser only)
-  if (isBrowser) {
-    const { protocol, hostname, port } = window.location;
-
-    // Development detection
-    if (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname.includes("dev")
-    ) {
-      const devPort = port || "3000";
-      return {
-        baseUrl: `${protocol}//${hostname}:${devPort}`,
-        version: "v1",
-      };
-    }
-
-    // Production - use current domain
-    return {
-      baseUrl: `${protocol}//${hostname}`,
-      version: "v1",
-    };
-  }
-
-  // Server-side fallback
+  // Default to junodeck.cc for all environments
+  // Only override with environment variable
   return {
-    baseUrl:
-      process.env.NODE_ENV === "production"
-        ? "https://junodeck.com"
-        : "http://localhost:3000",
+    baseUrl: "https://junodeck.cc",
     version: "v1",
   };
 }
