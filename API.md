@@ -131,11 +131,11 @@ do {
 
 ## Domain Configuration
 
-The library uses `https://junodeck.cc` as the default API domain for all environments.
+The library uses `https://www.junodeck.cc` as the default API domain for all environments.
 
 ### Default Behavior
 
-- **Default URL**: Always uses `https://junodeck.cc` unless overridden
+- **Default URL**: Always uses `https://www.junodeck.cc` unless overridden
 - **Environment override**: Set `JUNODECK_API_URL` environment variable to use a different URL
 - **Runtime override**: Set `window.__JUNODECK_API_URL__` in browser to use a different URL
 
@@ -219,7 +219,7 @@ Get current API configuration:
 import { getApiConfig } from "@junodeck/notebook-renderer";
 
 const config = getApiConfig();
-console.log(config.baseUrl); // "https://junodeck.cc" (default)
+console.log(config.baseUrl); // "https://www.junodeck.cc" (default)
 console.log(config.version); // "v1"
 ```
 
@@ -231,7 +231,7 @@ Get full API URL for an endpoint:
 import { getApiUrl } from "@junodeck/notebook-renderer";
 
 const url = getApiUrl("/deck/123");
-// Returns: "https://junodeck.cc/api/v1/deck/123"
+// Returns: "https://www.junodeck.cc/api/v1/deck/123"
 ```
 
 ## Error Handling

@@ -28,10 +28,10 @@ export function getApiConfig(): ApiConfig {
     };
   }
 
-  // Default to junodeck.cc for all environments
+  // Default to www.junodeck.cc for all environments
   // Only override with environment variable
   return {
-    baseUrl: "https://junodeck.cc",
+    baseUrl: "https://www.junodeck.cc",
     version: "v1",
   };
 }
