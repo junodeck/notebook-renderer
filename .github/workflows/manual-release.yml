@@ -21,7 +21,7 @@ on:
         description: "API URL for production build"
         required: false
         type: string
-        default: "https://junodeck.cc"
+        default: "https://www.junodeck.cc"
 
 jobs:
   validate:
