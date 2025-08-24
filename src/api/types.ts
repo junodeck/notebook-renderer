@@ -21,6 +21,7 @@ export interface DeckApiResponse {
     views: number;
     createdAt: string;
     updatedAt: string;
+    slug: string;
   };
   error?: {
     code: string;
@@ -82,6 +83,7 @@ export interface DeckListApiResponse {
     title: string;
     notebookTitle: string;
     publicUrl: string;
+    slug: string;
   }[];
   pagination: {
     skip: number;
