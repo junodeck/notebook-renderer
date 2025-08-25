@@ -9,6 +9,9 @@ export interface DeckApiResponse {
     id: string;
     title: string;
     description: string;
+    subtitle?: string;
+    heroImageUrl?: string;
+    tag?: string;
     notebookTitle: string;
     notebookData: JupiterNotebook;
     layout: "page" | "slideshow";
@@ -81,6 +84,9 @@ export interface DeckListApiResponse {
   data: {
     id: string;
     title: string;
+    subtitle?: string;
+    heroImageUrl?: string;
+    tag?: string;
     notebookTitle: string;
     publicUrl: string;
     slug: string;

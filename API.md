@@ -40,6 +40,9 @@ const result = await fetchDeck("deck-123", {
 
 if (result.success) {
   console.log(result.data.title);
+  console.log(result.data.subtitle); // Optional subtitle
+  console.log(result.data.heroImageUrl); // Optional hero image
+  console.log(result.data.tag); // Optional categorization tag
   console.log(result.data.notebookData); // JupiterNotebook object
   console.log(result.data.theme);
 } else {
@@ -87,6 +90,9 @@ if (result.success && result.data && result.pagination) {
   result.data.forEach((deck) => {
     console.log(`${deck.title}: ${deck.publicUrl}`);
     console.log(`Notebook: ${deck.notebookTitle}`);
+    if (deck.subtitle) console.log(`Subtitle: ${deck.subtitle}`);
+    if (deck.tag) console.log(`Tag: ${deck.tag}`);
+    if (deck.heroImageUrl) console.log(`Hero Image: ${deck.heroImageUrl}`);
   });
 
   if (result.pagination.hasMore) {
@@ -115,6 +121,8 @@ do {
     console.log(`Page ${Math.floor(skip / limit) + 1}:`);
     result.data.forEach((deck, index) => {
       console.log(`${skip + index + 1}. ${deck.title}`);
+      if (deck.subtitle) console.log(`   Subtitle: ${deck.subtitle}`);
+      if (deck.tag) console.log(`   Tag: ${deck.tag}`);
     });
 
     if (result.pagination.hasMore) {

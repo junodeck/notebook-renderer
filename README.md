@@ -246,19 +246,79 @@ function App() {
 The library includes built-in functions to fetch deck data from JunoDeck servers:
 
 ```tsx
-import { fetchNotebook, NotebookRenderer } from "@junodeck/notebook-renderer";
+import { fetchDeck, NotebookRenderer } from "@junodeck/notebook-renderer";
 
 function MyDeckViewer({ deckId, apiKey }) {
-  const [notebook, setNotebook] = useState(null);
+  const [deckData, setDeckData] = useState(null);
 
   useEffect(() => {
-    fetchNotebook(deckId, { apiKey }).then(setNotebook).catch(console.error);
+    fetchDeck(deckId, { apiKey })
+      .then((result) => {
+        if (result.success) {
+          setDeckData(result.data);
+        }
+      })
+      .catch(console.error);
   }, [deckId, apiKey]);
 
-  if (!notebook) return <div>Loading...</div>;
+  if (!deckData) return <div>Loading...</div>;
 
   return (
-    <NotebookRenderer notebook={notebook} theme="jupiter-light" layout="page" />
+    <div>
+      {/* Optional hero image */}
+      {deckData.heroImageUrl && (
+        <img
+          src={deckData.heroImageUrl}
+          alt="Hero"
+          className="deck-hero-image"
+        />
+      )}
+
+      {/* Optional subtitle */}
+      {deckData.subtitle && (
+        <div className="deck-subtitle">{deckData.subtitle}</div>
+      )}
+
+      {/* Optional tag */}
+      {deckData.tag && <span className="deck-tag">{deckData.tag}</span>}
+
+      <NotebookRenderer
+        notebook={deckData.notebookData}
+        theme={deckData.theme}
+        layout={deckData.layout}
+      />
+    </div>
+  );
+}
+
+// Fetch and display a list of decks
+function DeckBrowser({ apiKey }) {
+  const [decks, setDecks] = useState([]);
+
+  useEffect(() => {
+    fetchDeckList({ apiKey, limit: 10 })
+      .then((result) => {
+        if (result.success) {
+          setDecks(result.data);
+        }
+      })
+      .catch(console.error);
+  }, [apiKey]);
+
+  return (
+    <div className="deck-grid">
+      {decks.map((deck) => (
+        <div key={deck.id} className="deck-card">
+          {deck.heroImageUrl && (
+            <img src={deck.heroImageUrl} alt="" className="card-image" />
+          )}
+          <h3>{deck.title}</h3>
+          {deck.subtitle && <p className="card-subtitle">{deck.subtitle}</p>}
+          {deck.tag && <span className="card-tag">{deck.tag}</span>}
+          <a href={deck.publicUrl}>View Deck</a>
+        </div>
+      ))}
+    </div>
   );
 }
 ```

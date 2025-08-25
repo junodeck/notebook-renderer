@@ -184,6 +184,8 @@ export async function fetchNotebook(deckId: string, options: FetchDeckOptions) {
  *   console.log(`Found ${result.pagination.total} decks total`);
  *   result.data.forEach(deck => {
  *     console.log(`${deck.title}: ${deck.publicUrl}`);
+ *     if (deck.subtitle) console.log(`Subtitle: ${deck.subtitle}`);
+ *     if (deck.tag) console.log(`Tag: ${deck.tag}`);
  *   });
  *   if (result.pagination.hasMore) {
  *     console.log("More decks available");
