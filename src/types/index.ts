@@ -73,6 +73,12 @@ export interface CellComponentProps {
   cellIndex?: number;
 }
 
+// Props for layout components
+export interface LayoutProps {
+  showHeader?: boolean;
+  showFooter?: boolean;
+}
+
 // Custom component interfaces
 export interface CustomCellComponents {
   CodeCell?: React.ComponentType<CellComponentProps>;

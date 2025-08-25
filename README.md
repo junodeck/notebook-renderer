@@ -22,6 +22,7 @@ npm install @junodeck/notebook-renderer
 - 🔧 **TypeScript** - Full type safety and IntelliSense support
 - ⚡ **Performance** - Optimized rendering with React best practices
 - 🌐 **Built-in API** - Fetch deck data directly from JunoDeck servers
+- 📝 **Advanced Markdown** - Comprehensive markdown parsing with GFM support
 
 ## Usage
 
@@ -98,6 +99,41 @@ function App() {
     <NotebookRenderer notebook={notebook} theme="jupiter-dark" layout="page" />
   );
 }
+```
+
+### Hide Notebook Header and Footer
+
+You can hide the notebook header and footer using the `showHeader` and `showFooter` props:
+
+```tsx
+// Hide header in page layout
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showHeader={false}
+/>
+
+// Hide footer (stats) in page layout
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showFooter={false}
+/>
+
+// Hide navigation controls in slideshow layout
+<NotebookRenderer
+  notebook={notebook}
+  layout="slideshow"
+  showFooter={false}
+/>
+
+// Clean presentation without header or footer
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showHeader={false}
+  showFooter={false}
+/>
 ```
 
 ### Individual Cell Components
@@ -197,6 +233,9 @@ function App() {
       customComponents={customComponents}
       theme="jupiter-dark"
       layout="page"
+      showHeader={true}
+      showFooter={true}
+      showMetadata={false}
     />
   );
 }
@@ -225,6 +264,73 @@ function MyDeckViewer({ deckId, apiKey }) {
 ```
 
 For detailed API documentation including domain configuration and error handling, see [API.md](./API.md).
+
+## Markdown Parsing
+
+The library includes a powerful markdown parser with support for GitHub Flavored Markdown (GFM):
+
+```tsx
+import { parseMarkdown, markdownToHtml } from "@junodeck/notebook-renderer";
+
+// Parse markdown with full metadata extraction
+const result = parseMarkdown(
+  "# Hello\n\nThis is **bold** text with a [link](https://example.com)"
+);
+console.log(result.html); // Parsed HTML
+console.log(result.metadata.headings); // Extracted headings
+console.log(result.metadata.links); // Extracted links
+
+// Simple conversion
+const html = markdownToHtml("# Hello World\n\nThis is markdown text.");
+
+// Extract specific elements
+import {
+  extractTableOfContents,
+  extractLinks,
+} from "@junodeck/notebook-renderer";
+
+const toc = extractTableOfContents(markdownText);
+const links = extractLinks(markdownText);
+```
+
+### Markdown Features Supported
+
+- **Headers** (H1-H6) with auto-generated IDs
+- **Text formatting** (bold, italic, strikethrough)
+- **Code blocks** with syntax highlighting support
+- **Inline code** with proper escaping
+- **Links and images** with optional titles
+- **Lists** (ordered and unordered, nested)
+- **Tables** (GitHub Flavored Markdown)
+- **Blockquotes** with proper nesting
+- **Horizontal rules**
+- **Paragraphs and line breaks**
+- **HTML sanitization** for security
+
+### Custom Markdown Options
+
+```tsx
+import {
+  MarkdownCell,
+  type MarkdownParseOptions,
+} from "@junodeck/notebook-renderer";
+
+const markdownOptions: MarkdownParseOptions = {
+  sanitize: true, // Enable HTML sanitization (default: true)
+  linksInNewTab: true, // Open links in new tab (default: true)
+  classPrefix: "my-md", // Custom CSS class prefix (default: 'nb-md')
+  gfm: true, // GitHub Flavored Markdown (default: true)
+};
+
+// Use with MarkdownCell
+<MarkdownCell
+  source={["# Hello\n\nMarkdown content"]}
+  markdownOptions={markdownOptions}
+  onParsed={(parsed) => {
+    console.log("Parsed metadata:", parsed.metadata);
+  }}
+/>;
+```
 
 ### Advanced Custom Components
 
@@ -309,10 +415,19 @@ const TOCMarkdownCell: React.FC<CellComponentProps> = ({ cell }) => {
 import { SlideshowLayout, PageLayout } from '@junodeck/notebook-renderer';
 
 // Slideshow presentation
-<SlideshowLayout notebook={notebook} theme="jupiter-light" />
+<SlideshowLayout
+  notebook={notebook}
+  theme="jupiter-light"
+  showHeader={true}
+/>
 
-// Single page layout
-<PageLayout notebook={notebook} theme="default" />
+// Single page layout without header or footer
+<PageLayout
+  notebook={notebook}
+  theme="default"
+  showHeader={false}
+  showFooter={false}
+/>
 ```
 
 ### Hooks
@@ -347,9 +462,11 @@ Main component for rendering complete notebooks.
 - `theme?: string` - Theme name (default: "default")
 - `layout?: "page" | "slideshow"` - Layout type (default: "page")
 - `className?: string` - Additional CSS classes
-- `showExecutionCount?: boolean` - Show execution counts (default: true)
+- `showExecutionCount?: boolean` - Show execution counts (default: false)
 - `showCellNumbers?: boolean` - Show cell numbers (default: false)
 - `showMetadata?: boolean` - Show cell metadata (default: false)
+- `showHeader?: boolean` - Show notebook/slide header (default: true)
+- `showFooter?: boolean` - Show notebook/slide footer (default: true)
 - `customComponents?: CustomCellComponents` - Custom cell components
 
 #### `CodeCell`
@@ -372,6 +489,9 @@ Renders markdown content.
 
 - `source: string[]` - Markdown lines
 - `metadata?: Record<string, unknown>` - Cell metadata
+- `markdownOptions?: MarkdownParseOptions` - Parsing configuration
+- `showMetadata?: boolean` - Show cell metadata (default: false)
+- `onParsed?: (parsed: ParsedMarkdown) => void` - Callback when parsed
 
 #### `OutputCell`
 
@@ -434,7 +554,169 @@ Available themes:
 - `scientific` - Academic paper style
 - `presentation` - High contrast for presentations
 
+## Layout Options
+
+### Page Layout
+
+The page layout displays the notebook as a single scrollable page:
+
+```tsx
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showHeader={true} // Shows notebook title and metadata
+  showMetadata={true} // Shows kernel info, creation date, etc.
+/>
+```
+
+**Header content in page layout:**
+
+- Notebook title
+- Kernel information (when `showMetadata={true}`)
+- Creation date (when `showMetadata={true}`)
+
+**Footer content in page layout:**
+
+- Total cell count
+- Visible cell count
+- Programming language information
+
+### Slideshow Layout
+
+The slideshow layout presents the notebook as interactive slides:
+
+```tsx
+<NotebookRenderer
+  notebook={notebook}
+  layout="slideshow"
+  showHeader={true} // Shows slide titles
+  showFooter={true} // Shows navigation and thumbnails
+  autoAdvance={false}
+/>
+```
+
+**Header content in slideshow layout:**
+
+- Individual slide titles (generated from markdown headers)
+
+**Footer content in slideshow layout:**
+
+- Navigation controls (previous/next buttons, slide counter)
+- Playback controls (when `autoAdvance={true}`)
+- Slide thumbnails/overview panel
+
+### Header and Footer Visibility Examples
+
+```tsx
+// Minimal presentation without headers or footers
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showHeader={false}
+  showFooter={false}
+  showMetadata={false}
+/>
+
+// Slideshow without navigation for immersive viewing
+<NotebookRenderer
+  notebook={notebook}
+  layout="slideshow"
+  showHeader={false}
+  showFooter={false}
+/>
+
+// Page with header but no footer stats
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showHeader={true}
+  showFooter={false}
+  showMetadata={true}
+/>
+
+// Slideshow with thumbnails but no slide titles
+<NotebookRenderer
+  notebook={notebook}
+  layout="slideshow"
+  showHeader={false}
+  showFooter={true}
+/>
+
+// Full display with all elements
+<NotebookRenderer
+  notebook={notebook}
+  layout="page"
+  showHeader={true}
+  showFooter={true}
+  showMetadata={true}
+/>
+```
+
 ## Examples
+
+### Using Markdown Utilities in Custom Components
+
+```tsx
+import {
+  parseMarkdown,
+  extractTableOfContents,
+  type CellComponentProps,
+  type MarkdownParseOptions,
+} from "@junodeck/notebook-renderer";
+
+const CustomMarkdownCell: React.FC<CellComponentProps> = ({ cell }) => {
+  const [toc, setToc] = useState<
+    Array<{ level: number; text: string; id: string }>
+  >([]);
+
+  const markdownOptions: MarkdownParseOptions = {
+    classPrefix: "custom-md",
+    gfm: true,
+    linksInNewTab: true,
+  };
+
+  const parsedMarkdown = React.useMemo(() => {
+    const markdown = cell.source.join("\n");
+    const result = parseMarkdown(markdown, markdownOptions);
+
+    // Extract table of contents
+    setToc(result.metadata.headings);
+
+    return result;
+  }, [cell.source]);
+
+  return (
+    <div className="custom-markdown-cell">
+      {/* Table of Contents */}
+      {toc.length > 0 && (
+        <nav className="toc">
+          <h4>Contents</h4>
+          <ul>
+            {toc.map((heading, idx) => (
+              <li key={idx} className={`toc-level-${heading.level}`}>
+                <a href={`#${heading.id}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {/* Rendered content */}
+      <div
+        className="markdown-content"
+        dangerouslySetInnerHTML={{ __html: parsedMarkdown.html }}
+      />
+
+      {/* Metadata display */}
+      <div className="content-stats">
+        <span>{parsedMarkdown.metadata.links.length} links</span>
+        <span>{parsedMarkdown.metadata.images.length} images</span>
+        <span>{parsedMarkdown.metadata.codeBlocks.length} code blocks</span>
+      </div>
+    </div>
+  );
+};
+```
 
 ### Creating a Custom Code Cell with Copy Button
 
@@ -496,6 +778,9 @@ function App() {
     <NotebookRenderer
       notebook={notebook}
       customComponents={{ CodeCell: CopyableCodeCell }}
+      showHeader={true}
+      showFooter={true}
+      showMetadata={false}
     />
   );
 }

@@ -17,6 +17,8 @@ export interface SlideshowLayoutProps {
   showExecutionCount?: boolean;
   showCellNumbers?: boolean;
   showMetadata?: boolean;
+  showHeader?: boolean;
+  showFooter?: boolean;
   autoAdvance?: boolean;
   autoAdvanceDelay?: number;
   customComponents?: {
@@ -41,6 +43,8 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
   showExecutionCount = false,
   showCellNumbers = false,
   showMetadata = false, // eslint-disable-line @typescript-eslint/no-unused-vars
+  showHeader = true,
+  showFooter = true,
   customComponents,
   autoAdvance = false,
   autoAdvanceDelay = 5000,
@@ -284,9 +288,11 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
       <main className="slide-container">
         {currentSlide && (
           <div className="slide">
-            <header className="slide-header">
-              <h1 className="slide-title">{currentSlide.title}</h1>
-            </header>
+            {showHeader && (
+              <header className="slide-header">
+                <h1 className="slide-title">{currentSlide.title}</h1>
+              </header>
+            )}
 
             <div className="slide-content">
               {currentSlide.cells.map((cell, index) => renderCell(cell, index))}
@@ -295,65 +301,70 @@ export const SlideshowLayout: React.FC<SlideshowLayoutProps> = ({
         )}
       </main>
 
-      {/* Navigation controls */}
-      <nav className="slide-controls">
-        <div className="slide-navigation">
-          <button
-            className="nav-button prev"
-            onClick={prevSlide}
-            disabled={currentSlideIndex === 0}
-            aria-label="Previous slide"
-          >
-            ←
-          </button>
+      {/* Navigation controls and slide overview - footer content */}
+      {showFooter && (
+        <>
+          {/* Navigation controls */}
+          <nav className="slide-controls">
+            <div className="slide-navigation">
+              <button
+                className="nav-button prev"
+                onClick={prevSlide}
+                disabled={currentSlideIndex === 0}
+                aria-label="Previous slide"
+              >
+                ←
+              </button>
 
-          <span className="slide-counter">
-            {currentSlideIndex + 1} / {slides.length}
-          </span>
+              <span className="slide-counter">
+                {currentSlideIndex + 1} / {slides.length}
+              </span>
 
-          <button
-            className="nav-button next"
-            onClick={nextSlide}
-            disabled={currentSlideIndex === slides.length - 1}
-            aria-label="Next slide"
-          >
-            →
-          </button>
-        </div>
+              <button
+                className="nav-button next"
+                onClick={nextSlide}
+                disabled={currentSlideIndex === slides.length - 1}
+                aria-label="Next slide"
+              >
+                →
+              </button>
+            </div>
 
-        {autoAdvance && (
-          <div className="playback-controls">
-            <button
-              className={clsx("play-button", { active: isPlaying })}
-              onClick={() => setIsPlaying(!isPlaying)}
-              aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
-            >
-              {isPlaying ? "⏸" : "▶"}
-            </button>
-          </div>
-        )}
-      </nav>
+            {autoAdvance && (
+              <div className="playback-controls">
+                <button
+                  className={clsx("play-button", { active: isPlaying })}
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+                >
+                  {isPlaying ? "⏸" : "▶"}
+                </button>
+              </div>
+            )}
+          </nav>
 
-      {/* Slide thumbnails/overview */}
-      <aside className="slide-overview">
-        <div className="slide-thumbnails">
-          {slides.map((slide, index) => (
-            <button
-              key={slide.id}
-              className={clsx("slide-thumbnail", {
-                active: index === currentSlideIndex,
-                [slide.type]: true,
-              })}
-              onClick={() => goToSlide(index)}
-              aria-label={`Go to slide ${index + 1}: ${slide.title}`}
-            >
-              <div className="thumbnail-number">{index + 1}</div>
-              <div className="thumbnail-title">{slide.title}</div>
-              <div className="thumbnail-type">{slide.type}</div>
-            </button>
-          ))}
-        </div>
-      </aside>
+          {/* Slide thumbnails/overview */}
+          <aside className="slide-overview">
+            <div className="slide-thumbnails">
+              {slides.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  className={clsx("slide-thumbnail", {
+                    active: index === currentSlideIndex,
+                    [slide.type]: true,
+                  })}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Go to slide ${index + 1}: ${slide.title}`}
+                >
+                  <div className="thumbnail-number">{index + 1}</div>
+                  <div className="thumbnail-title">{slide.title}</div>
+                  <div className="thumbnail-type">{slide.type}</div>
+                </button>
+              ))}
+            </div>
+          </aside>
+        </>
+      )}
     </div>
   );
 };

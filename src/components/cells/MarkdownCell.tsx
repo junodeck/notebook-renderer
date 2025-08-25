@@ -1,85 +1,91 @@
 import React from "react";
 import { clsx } from "clsx";
+import {
+  parseMarkdown,
+  type MarkdownParseOptions,
+  type ParsedMarkdown,
+} from "../../lib/markdown";
 
 export interface MarkdownCellProps {
   source: string[];
   metadata?: Record<string, unknown>;
   className?: string;
+  /**
+   * Options for markdown parsing
+   */
+  markdownOptions?: MarkdownParseOptions;
+  /**
+   * Whether to show metadata information (default: false)
+   */
+  showMetadata?: boolean;
+  /**
+   * Callback when markdown is parsed (useful for extracting TOC, links, etc.)
+   */
+  onParsed?: (parsed: ParsedMarkdown) => void;
 }
 
 export const MarkdownCell: React.FC<MarkdownCellProps> = ({
   source,
   metadata,
   className,
+  markdownOptions,
+  showMetadata = false,
+  onParsed,
 }) => {
   const markdown = source.join("\n");
 
-  // Simple markdown parsing (you might want to use a proper markdown parser like marked or remark)
-  const parseMarkdown = (text: string): string => {
-    return (
-      text
-        // Headers
-        .replace(/^### (.*$)/gm, "<h3>$1</h3>")
-        .replace(/^## (.*$)/gm, "<h2>$1</h2>")
-        .replace(/^# (.*$)/gm, "<h1>$1</h1>")
+  // Parse markdown with the new parser
+  const parsedMarkdown = React.useMemo(() => {
+    const options: MarkdownParseOptions = {
+      classPrefix: "nb-md",
+      sanitize: true,
+      linksInNewTab: true,
+      gfm: true,
+      ...markdownOptions,
+    };
 
-        // Bold and italic
-        .replace(/\*\*\*(.*?)\*\*\*/g, "<strong><em>$1</em></strong>")
-        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    const result = parseMarkdown(markdown, options);
 
-        // Code blocks
-        .replace(
-          /```(\w+)?\n([\s\S]*?)```/g,
-          '<pre><code class="language-$1">$2</code></pre>'
-        )
-        .replace(/`([^`]+)`/g, "<code>$1</code>")
-
-        // Links
-        .replace(
-          /\[([^\]]+)\]\(([^)]+)\)/g,
-          '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-        )
-
-        // Lists
-        .replace(/^\* (.*$)/gm, "<li>$1</li>")
-        .replace(/^- (.*$)/gm, "<li>$1</li>")
-        .replace(/^\d+\. (.*$)/gm, "<li>$1</li>")
-
-        // Line breaks
-        .replace(/\n\n/g, "</p><p>")
-        .replace(/\n/g, "<br>")
-    );
-  };
-
-  // Wrap content in paragraphs if it doesn't start with a header or list
-  const processedMarkdown = React.useMemo(() => {
-    const parsed = parseMarkdown(markdown);
-
-    // Wrap lists in ul tags
-    const withLists = parsed
-      .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
-      .replace(/<\/li><li>/g, "</li><li>");
-
-    // Wrap in paragraph if it doesn't start with block elements
-    if (!withLists.match(/^<(h[1-6]|ul|ol|pre|div)/)) {
-      return `<p>${withLists}</p>`;
+    // Call onParsed callback if provided
+    if (onParsed) {
+      onParsed(result);
     }
 
-    return withLists;
-  }, [markdown]);
+    return result;
+  }, [markdown, markdownOptions, onParsed]);
 
   return (
     <div className={clsx("nb-cell nb-markdown-cell", className)}>
       <div
         className="nb-markdown-content"
-        dangerouslySetInnerHTML={{ __html: processedMarkdown }}
+        dangerouslySetInnerHTML={{ __html: parsedMarkdown.html }}
       />
 
-      {/* Metadata (hidden by default, can be styled) */}
-      {metadata && Object.keys(metadata).length > 0 && (
-        <div className="cell-metadata" style={{ display: "none" }}>
-          {JSON.stringify(metadata)}
+      {/* Metadata display */}
+      {showMetadata && metadata && Object.keys(metadata).length > 0 && (
+        <div className="nb-cell-metadata">
+          <details className="nb-metadata-details">
+            <summary className="nb-metadata-summary">Cell Metadata</summary>
+            <pre className="nb-metadata-content">
+              {JSON.stringify(metadata, null, 2)}
+            </pre>
+          </details>
+        </div>
+      )}
+
+      {/* Parsed content metadata (hidden by default, available for styling) */}
+      {parsedMarkdown.metadata && (
+        <div className="nb-parsed-metadata" style={{ display: "none" }}>
+          <div
+            data-headings={JSON.stringify(parsedMarkdown.metadata.headings)}
+          />
+          <div data-links={JSON.stringify(parsedMarkdown.metadata.links)} />
+          <div data-images={JSON.stringify(parsedMarkdown.metadata.images)} />
+          <div
+            data-code-blocks={JSON.stringify(
+              parsedMarkdown.metadata.codeBlocks
+            )}
+          />
         </div>
       )}
     </div>

@@ -17,6 +17,8 @@ export interface NotebookRendererProps {
   showExecutionCount?: boolean;
   showCellNumbers?: boolean;
   showMetadata?: boolean;
+  showHeader?: boolean;
+  showFooter?: boolean;
   customComponents?: CustomCellComponents;
 }
 
@@ -28,6 +30,8 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
   showExecutionCount = false,
   showCellNumbers = false,
   showMetadata = false,
+  showHeader = true,
+  showFooter = true,
   customComponents,
 }) => {
   // Use the theme hook to apply theme changes
@@ -62,6 +66,8 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
           showExecutionCount={showExecutionCount}
           showCellNumbers={showCellNumbers}
           showMetadata={showMetadata}
+          showHeader={showHeader}
+          showFooter={showFooter}
           customComponents={components}
         />
       </div>
@@ -76,6 +82,8 @@ export const NotebookRenderer: React.FC<NotebookRendererProps> = ({
         showExecutionCount={showExecutionCount}
         showCellNumbers={showCellNumbers}
         showMetadata={showMetadata}
+        showHeader={showHeader}
+        showFooter={showFooter}
         customComponents={components}
       />
     </div>

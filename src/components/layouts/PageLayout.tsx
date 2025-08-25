@@ -17,6 +17,8 @@ export interface PageLayoutProps {
   showExecutionCount?: boolean;
   showCellNumbers?: boolean;
   showMetadata?: boolean;
+  showHeader?: boolean;
+  showFooter?: boolean;
   customComponents?: {
     CodeCell: React.ComponentType<CellComponentProps>;
     MarkdownCell: React.ComponentType<CellComponentProps>;
@@ -32,6 +34,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   showExecutionCount = false,
   showCellNumbers = false,
   showMetadata = false,
+  showHeader = true,
+  showFooter = true,
   customComponents,
 }) => {
   const visibleCells = notebook.cells.filter((cell) => cell.visible !== false);
@@ -127,33 +131,35 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       )}
     >
       {/* Notebook header */}
-      <header className="notebook-header">
-        {notebook.metadata.title && (
-          <h1 className="notebook-title">{notebook.metadata.title}</h1>
-        )}
+      {showHeader && (
+        <header className="notebook-header">
+          {notebook.metadata.title && (
+            <h1 className="notebook-title">{notebook.metadata.title}</h1>
+          )}
 
-        {showMetadata && (
-          <div className="notebook-metadata">
-            {notebook.metadata.kernelspec && (
-              <div className="kernel-info">
-                <span className="kernel-name">
-                  {notebook.metadata.kernelspec.display_name}
-                </span>
-                <span className="kernel-language">
-                  ({notebook.metadata.kernelspec.language})
-                </span>
-              </div>
-            )}
+          {showMetadata && (
+            <div className="notebook-metadata">
+              {notebook.metadata.kernelspec && (
+                <div className="kernel-info">
+                  <span className="kernel-name">
+                    {notebook.metadata.kernelspec.display_name}
+                  </span>
+                  <span className="kernel-language">
+                    ({notebook.metadata.kernelspec.language})
+                  </span>
+                </div>
+              )}
 
-            {notebook.metadata.created && (
-              <div className="created-date">
-                Created:{" "}
-                {new Date(notebook.metadata.created).toLocaleDateString()}
-              </div>
-            )}
-          </div>
-        )}
-      </header>
+              {notebook.metadata.created && (
+                <div className="created-date">
+                  Created:{" "}
+                  {new Date(notebook.metadata.created).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          )}
+        </header>
+      )}
 
       {/* Notebook cells */}
       <main className="notebook-content">
@@ -169,15 +175,17 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       </main>
 
       {/* Notebook footer */}
-      <footer className="notebook-footer">
-        <div className="notebook-stats">
-          <span>{notebook.cells.length} total cells</span>
-          <span>{visibleCells.length} visible cells</span>
-          {notebook.metadata.language_info && (
-            <span>Language: {notebook.metadata.language_info.name}</span>
-          )}
-        </div>
-      </footer>
+      {showFooter && (
+        <footer className="notebook-footer">
+          <div className="notebook-stats">
+            <span>{notebook.cells.length} total cells</span>
+            <span>{visibleCells.length} visible cells</span>
+            {notebook.metadata.language_info && (
+              <span>Language: {notebook.metadata.language_info.name}</span>
+            )}
+          </div>
+        </footer>
+      )}
     </div>
   );
 };

@@ -22,6 +22,18 @@ export { useTheme, defaultThemes } from "./hooks/useTheme";
 export { fetchDeck, fetchNotebook, fetchDeckList } from "./api";
 export { getApiConfig, getApiUrl } from "./config";
 
+// Export markdown utilities
+export {
+  parseMarkdown,
+  markdownToHtml,
+  extractTableOfContents,
+  extractLinks,
+  extractImages,
+  extractCodeBlocks,
+  escapeHtml,
+  generateId,
+} from "./lib/markdown";
+
 // Export types
 export type {
   JupiterNotebook,
@@ -59,3 +71,6 @@ export type {
   FetchDeckListOptions,
 } from "./api/types";
 export type { ApiConfig } from "./config";
+
+// Export markdown types
+export type { MarkdownParseOptions, ParsedMarkdown } from "./lib/markdown";
